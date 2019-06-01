@@ -1,7 +1,9 @@
 # Episode 7
 
 [Video](https://www.youtube.com/watch?v=SJE_gUnJl2Y&list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y&index=7) |
-[Pull Request](https://github.com/terrajobst/minsk/pull/28)
+[Pull Request](https://github.com/terrajobst/minsk/pull/28) |
+[Previous](episode-06.md) |
+[Next](episode-08.md)
 
 ## Completed items
 
@@ -171,10 +173,10 @@ simple approach of remembering the current token before calling
         Current.Kind != SyntaxKind.CloseBraceToken)
  {
 +     var startToken = Current;
-+ 
++
      var statement = ParseStatement();
      statements.Add(statement);
-+     
++
 +     if (Current == startToken)
 +         NextToken();
  }

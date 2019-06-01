@@ -33,6 +33,12 @@ namespace Minsk.CodeAnalysis.Syntax
                     if (child != null)
                         yield return child;
                 }
+                else if (typeof(SeparatedSyntaxList).IsAssignableFrom(property.PropertyType))
+                {
+                    var separatedSyntaxList = (SeparatedSyntaxList)property.GetValue(this);
+                    foreach (var child in separatedSyntaxList.GetWithSeparators())
+                        yield return child;
+                }
                 else if (typeof(IEnumerable<SyntaxNode>).IsAssignableFrom(property.PropertyType))
                 {
                     var children = (IEnumerable<SyntaxNode>)property.GetValue(this);
@@ -43,6 +49,15 @@ namespace Minsk.CodeAnalysis.Syntax
                     }
                 }
             }
+        }
+
+        public SyntaxToken GetLastToken()
+        {
+            if (this is SyntaxToken token)
+                return token;
+
+            // A syntax node should always contain at least 1 token.
+            return GetChildren().Last().GetLastToken();
         }
 
         public void WriteTo(TextWriter writer)

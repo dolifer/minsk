@@ -58,16 +58,24 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             switch (text)
             {
+                case "break":
+                    return SyntaxKind.BreakKeyword;
+                case "continue":
+                    return SyntaxKind.ContinueKeyword;
                 case "else":
                     return SyntaxKind.ElseKeyword;
                 case "false":
                     return SyntaxKind.FalseKeyword;
                 case "for":
                     return SyntaxKind.ForKeyword;
+                case "function":
+                    return SyntaxKind.FunctionKeyword;
                 case "if":
                     return SyntaxKind.IfKeyword;
                 case "let":
                     return SyntaxKind.LetKeyword;
+                case "return":
+                    return SyntaxKind.ReturnKeyword;
                 case "to":
                     return SyntaxKind.ToKeyword;
                 case "true":
@@ -76,6 +84,8 @@ namespace Minsk.CodeAnalysis.Syntax
                     return SyntaxKind.VarKeyword;
                 case "while":
                     return SyntaxKind.WhileKeyword;
+                case "do":
+                    return SyntaxKind.DoKeyword;
                 default:
                     return SyntaxKind.IdentifierToken;
             }
@@ -149,16 +159,28 @@ namespace Minsk.CodeAnalysis.Syntax
                     return "{";
                 case SyntaxKind.CloseBraceToken:
                     return "}";
+                case SyntaxKind.ColonToken:
+                    return ":";
+                case SyntaxKind.CommaToken:
+                    return ",";
+                case SyntaxKind.BreakKeyword:
+                    return "break";
+                case SyntaxKind.ContinueKeyword:
+                    return "continue";
                 case SyntaxKind.ElseKeyword:
                     return "else";
                 case SyntaxKind.FalseKeyword:
                     return "false";
                 case SyntaxKind.ForKeyword:
                     return "for";
+                case SyntaxKind.FunctionKeyword:
+                    return "function";
                 case SyntaxKind.IfKeyword:
                     return "if";
                 case SyntaxKind.LetKeyword:
                     return "let";
+                case SyntaxKind.ReturnKeyword:
+                    return "return";
                 case SyntaxKind.ToKeyword:
                     return "to";
                 case SyntaxKind.TrueKeyword:
@@ -167,6 +189,8 @@ namespace Minsk.CodeAnalysis.Syntax
                     return "var";
                 case SyntaxKind.WhileKeyword:
                     return "while";
+                case SyntaxKind.DoKeyword:
+                    return "do";
                 default:
                     return null;
             }

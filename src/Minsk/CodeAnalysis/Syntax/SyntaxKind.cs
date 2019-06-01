@@ -7,6 +7,7 @@ namespace Minsk.CodeAnalysis.Syntax
         EndOfFileToken,
         WhitespaceToken,
         NumberToken,
+        StringToken,
         PlusToken,
         MinusToken,
         StarToken,
@@ -29,21 +30,32 @@ namespace Minsk.CodeAnalysis.Syntax
         CloseParenthesisToken,
         OpenBraceToken,
         CloseBraceToken,
+        ColonToken,
+        CommaToken,
         IdentifierToken,
 
         // Keywords
+        BreakKeyword,
+        ContinueKeyword,
         ElseKeyword,
         FalseKeyword,
         ForKeyword,
+        FunctionKeyword,
         IfKeyword,
         LetKeyword,
+        ReturnKeyword,
         ToKeyword,
         TrueKeyword,
         VarKeyword,
         WhileKeyword,
+        DoKeyword,
 
         // Nodes
         CompilationUnit,
+        FunctionDeclaration,
+        GlobalStatement,
+        Parameter,
+        TypeClause,
         ElseClause,
 
         // Statements
@@ -51,7 +63,11 @@ namespace Minsk.CodeAnalysis.Syntax
         VariableDeclaration,
         IfStatement,
         WhileStatement,
+        DoWhileStatement,
         ForStatement,
+        BreakStatement,
+        ContinueStatement,
+        ReturnStatement,
         ExpressionStatement,
 
         // Expressions
@@ -61,5 +77,6 @@ namespace Minsk.CodeAnalysis.Syntax
         BinaryExpression,
         ParenthesizedExpression,
         AssignmentExpression,
+        CallExpression,
     }
 }

@@ -7,17 +7,22 @@ namespace Minsk.CodeAnalysis.Binding
         VariableDeclaration,
         IfStatement,
         WhileStatement,
+        DoWhileStatement,
         ForStatement,
         LabelStatement,
         GotoStatement,
         ConditionalGotoStatement,
+        ReturnStatement,
         ExpressionStatement,
 
         // Expressions
+        ErrorExpression,
         LiteralExpression,
         VariableExpression,
         AssignmentExpression,
         UnaryExpression,
         BinaryExpression,
+        CallExpression,
+        ConversionExpression,
     }
 }

@@ -1,7 +1,9 @@
 # Episode 8
 
 [Video](https://www.youtube.com/watch?v=PfpayNvfu20&list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y&index=8) |
-[Pull Request](https://github.com/terrajobst/minsk/pull/35)
+[Pull Request](https://github.com/terrajobst/minsk/pull/35) |
+[Previous](episode-07.md) |
+[Next](episode-09.md)
 
 ## Completed items
 
@@ -92,7 +94,7 @@ protected override BoundStatement RewriteForStatement(BoundForStatement node)
     //      {
     //          <body>
     //          <var> = <var> + 1
-    //      }   
+    //      }
     // }
 
     var variableDeclaration = new BoundVariableDeclaration(node.Variable, node.LowerBound);
@@ -101,7 +103,7 @@ protected override BoundStatement RewriteForStatement(BoundForStatement node)
         variableExpression,
         BoundBinaryOperator.Bind(SyntaxKind.LessOrEqualsToken, typeof(int), typeof(int)),
         node.UpperBound
-    );            
+    );
     var increment = new BoundExpressionStatement(
         new BoundAssignmentExpression(
             node.Variable,
@@ -163,7 +165,7 @@ protected override BoundStatement RewriteIfStatement(BoundIfStatement node)
         // ---->
         //
         // gotoFalse <condition> end
-        // <then>  
+        // <then>
         // end:
         var endLabel = GenerateLabel();
         var gotoFalse = new BoundConditionalGotoStatement(endLabel, node.Condition, true);

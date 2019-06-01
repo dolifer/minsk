@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Minsk.CodeAnalysis;
+using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.CodeAnalysis.Text;
 
@@ -20,11 +21,19 @@ namespace Minsk
             foreach (var token in tokens)
             {
                 var isKeyword = token.Kind.ToString().EndsWith("Keyword");
+                var isIdentifier = token.Kind == SyntaxKind.IdentifierToken;
                 var isNumber = token.Kind == SyntaxKind.NumberToken;
+                var isString = token.Kind == SyntaxKind.StringToken;
 
                 if (isKeyword)
                     Console.ForegroundColor = ConsoleColor.Blue;
-                else if (!isNumber)
+                else if (isIdentifier)
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                else if (isNumber)
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                else if (isString)
+                    Console.ForegroundColor = ConsoleColor.Magenta;
+                else
                     Console.ForegroundColor = ConsoleColor.DarkGray;
 
                 Console.Write(token.Text);
@@ -63,11 +72,20 @@ namespace Minsk
             if (string.IsNullOrEmpty(text))
                 return true;
 
+            var lastTwoLinesAreBlank = text.Split(Environment.NewLine)
+                                           .Reverse()
+                                           .TakeWhile(s => string.IsNullOrEmpty(s))
+                                           .Take(2)
+                                           .Count() == 2;
+            if (lastTwoLinesAreBlank)
+                return true;
+
             var syntaxTree = SyntaxTree.Parse(text);
 
-            if (syntaxTree.Diagnostics.Any())
+            // Use Members because we need to exclude the EndOfFileToken.
+            if (syntaxTree.Root.Members.Last().GetLastToken().IsMissing)
                 return false;
-            
+
             return true;
         }
 
@@ -89,14 +107,17 @@ namespace Minsk
 
             if (!result.Diagnostics.Any())
             {
-                Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine(result.Value);
-                Console.ResetColor();
+                if (result.Value != null)
+                {
+                    Console.ForegroundColor = ConsoleColor.White;
+                    Console.WriteLine(result.Value);
+                    Console.ResetColor();
+                }
                 _previous = compilation;
             }
             else
             {
-                foreach (var diagnostic in result.Diagnostics)
+                foreach (var diagnostic in result.Diagnostics.OrderBy(diag => diag.Span, new TextSpanComparer()))
                 {
                     var lineIndex = syntaxTree.Text.GetLineIndex(diagnostic.Span.Start);
                     var line = syntaxTree.Text.Lines[lineIndex];
