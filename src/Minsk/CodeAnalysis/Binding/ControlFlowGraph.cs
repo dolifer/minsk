@@ -1,8 +1,9 @@
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
 
@@ -50,9 +51,10 @@ namespace Minsk.CodeAnalysis.Binding
                     return "<End>";
 
                 using (var writer = new StringWriter())
+                using (var indentedWriter = new IndentedTextWriter(writer))
                 {
                     foreach (var statement in Statements)
-                        statement.WriteTo(writer);
+                        statement.WriteTo(indentedWriter);
 
                     return writer.ToString();
                 }
@@ -61,7 +63,7 @@ namespace Minsk.CodeAnalysis.Binding
 
         public sealed class BasicBlockBranch
         {
-            public BasicBlockBranch(BasicBlock from, BasicBlock to, BoundExpression condition)
+            public BasicBlockBranch(BasicBlock from, BasicBlock to, BoundExpression? condition)
             {
                 From = from;
                 To = to;
@@ -70,7 +72,7 @@ namespace Minsk.CodeAnalysis.Binding
 
             public BasicBlock From { get; }
             public BasicBlock To { get; }
-            public BoundExpression Condition { get; }
+            public BoundExpression? Condition { get; }
 
             public override string ToString()
             {
@@ -102,6 +104,7 @@ namespace Minsk.CodeAnalysis.Binding
                             _statements.Add(statement);
                             StartBlock();
                             break;
+                        case BoundNodeKind.NopStatement:
                         case BoundNodeKind.VariableDeclaration:
                         case BoundNodeKind.ExpressionStatement:
                             _statements.Add(statement);
@@ -177,7 +180,7 @@ namespace Minsk.CodeAnalysis.Binding
                                 var cgs = (BoundConditionalGotoStatement)statement;
                                 var thenBlock = _blockFromLabel[cgs.Label];
                                 var elseBlock = next;
-                                var negatedCondition = Negate(cgs.Condition);;
+                                var negatedCondition = Negate(cgs.Condition);
                                 var thenCondition = cgs.JumpIfTrue ? cgs.Condition : negatedCondition;
                                 var elseCondition = cgs.JumpIfTrue ? negatedCondition : cgs.Condition;
                                 Connect(current, thenBlock, thenCondition);
@@ -186,6 +189,7 @@ namespace Minsk.CodeAnalysis.Binding
                             case BoundNodeKind.ReturnStatement:
                                 Connect(current, _end);
                                 break;
+                            case BoundNodeKind.NopStatement:
                             case BoundNodeKind.VariableDeclaration:
                             case BoundNodeKind.LabelStatement:
                             case BoundNodeKind.ExpressionStatement:
@@ -214,7 +218,7 @@ namespace Minsk.CodeAnalysis.Binding
                 return new ControlFlowGraph(_start, _end, blocks, _branches);
             }
 
-            private void Connect(BasicBlock from, BasicBlock to, BoundExpression condition = null)
+            private void Connect(BasicBlock from, BasicBlock to, BoundExpression? condition = null)
             {
                 if (condition is BoundLiteralExpression l)
                 {
@@ -250,14 +254,11 @@ namespace Minsk.CodeAnalysis.Binding
 
             private BoundExpression Negate(BoundExpression condition)
             {
-                if (condition is BoundLiteralExpression literal)
-                {
-                    var value = (bool)literal.Value;
-                    return new BoundLiteralExpression(!value);
-                }
+                var negated = BoundNodeFactory.Not(condition.Syntax, condition);
+                if (negated.ConstantValue != null)
+                    return new BoundLiteralExpression(condition.Syntax, negated.ConstantValue.Value);
 
-                var op = BoundUnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool);
-                return new BoundUnaryExpression(op, condition);
+                return negated;
             }
         }
 
@@ -265,7 +266,7 @@ namespace Minsk.CodeAnalysis.Binding
         {
             string Quote(string text)
             {
-                return "\"" + text.Replace("\"", "\\\"") + "\"";
+                return "\"" + text.TrimEnd().Replace("\\", "\\\\").Replace("\"", "\\\"").Replace(Environment.NewLine, "\\l") + "\"";
             }
 
             writer.WriteLine("digraph G {");
@@ -281,8 +282,8 @@ namespace Minsk.CodeAnalysis.Binding
             foreach (var block in Blocks)
             {
                 var id = blockIds[block];
-                var label = Quote(block.ToString().Replace(Environment.NewLine, "\\l"));
-                writer.WriteLine($"    {id} [label = {label} shape = box]");
+                var label = Quote(block.ToString());
+                writer.WriteLine($"    {id} [label = {label}, shape = box]");
             }
 
             foreach (var branch in Branches)
@@ -311,8 +312,8 @@ namespace Minsk.CodeAnalysis.Binding
 
             foreach (var branch in graph.End.Incoming)
             {
-                var lastStatement = branch.From.Statements.Last();
-                if (lastStatement.Kind != BoundNodeKind.ReturnStatement)
+                var lastStatement = branch.From.Statements.LastOrDefault();
+                if (lastStatement == null || lastStatement.Kind != BoundNodeKind.ReturnStatement)
                     return false;
             }
 

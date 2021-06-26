@@ -1,8 +1,9 @@
 namespace Minsk.CodeAnalysis.Syntax
 {
-    internal class ContinueStatementSyntax : StatementSyntax
+    internal sealed partial class ContinueStatementSyntax : StatementSyntax
     {
-        public ContinueStatementSyntax(SyntaxToken keyword)
+        internal ContinueStatementSyntax(SyntaxTree syntaxTree, SyntaxToken keyword)
+            : base(syntaxTree)
         {
             Keyword = keyword;
         }
